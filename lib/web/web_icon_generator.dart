@@ -71,7 +71,7 @@ class WebIconGenerator extends IconGenerator {
 
     // update manifest.json in web/mainfest.json
     context.logger.verbose(
-      'Updating ${path.join(context.prefixPath, constants.webManifestFilePath)}...',
+      'Updating ${path.join(context.prefixPath, constants.webManifestFilePath(context.module))}...',
     );
     _updateManifestFile();
 
@@ -100,9 +100,10 @@ class WebIconGenerator extends IconGenerator {
 
     // verify web platform related files and directories exists
     final entitesToCheck = [
-      path.join(context.prefixPath, constants.webDirPath),
-      path.join(context.prefixPath, constants.webManifestFilePath),
-      path.join(context.prefixPath, constants.webIndexFilePath),
+      path.join(context.prefixPath, constants.webDirPath(context.module)),
+      path.join(
+          context.prefixPath, constants.webManifestFilePath(context.module)),
+      path.join(context.prefixPath, constants.webIndexFilePath(context.module)),
     ];
 
     // web platform related files must exist to continue
@@ -119,14 +120,17 @@ class WebIconGenerator extends IconGenerator {
   void _generateFavicon(Image image) {
     final favIcon = utils.createResizedImage(constants.kFaviconSize, image);
     final favIconFile = utils.createFileIfNotExist(
-      path.join(context.prefixPath, constants.webFaviconFilePath),
+      path.join(
+        context.imagePath,
+        constants.webFaviconFilePath(context.module),
+      ),
     );
     favIconFile.writeAsBytesSync(encodePng(favIcon));
   }
 
   void _generateIcons(Image image) {
     final iconsDir = utils.createDirIfNotExist(
-      path.join(context.prefixPath, constants.webIconsDirPath),
+      path.join(context.imagePath, constants.webIconsDirPath(context.module)),
     );
     // generate icons
     for (final template in _webIconSizeTemplates) {
@@ -140,7 +144,10 @@ class WebIconGenerator extends IconGenerator {
 
   void _updateManifestFile() {
     final manifestFile = utils.createFileIfNotExist(
-      path.join(context.prefixPath, constants.webManifestFilePath),
+      path.join(
+        context.imagePath,
+        constants.webManifestFilePath(context.module),
+      ),
     );
     final manifestConfig =
         jsonDecode(manifestFile.readAsStringSync()) as Map<String, dynamic>;

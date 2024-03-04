@@ -20,6 +20,7 @@ const String fileOption = 'file';
 const String helpFlag = 'help';
 const String verboseFlag = 'verbose';
 const String prefixOption = 'prefix';
+const String moduleOption = 'module';
 const String defaultConfigFile = 'flutter_launcher_icons.yaml';
 const String flavorConfigFilePattern = r'^flutter_launcher_icons-(.*).yaml$';
 
@@ -54,6 +55,12 @@ Future<void> createIconsFromArguments(List<String> arguments) async {
       abbr: 'p',
       help: 'Generates config in the given path. Only Supports web platform',
       defaultsTo: '.',
+    )
+    ..addOption(
+      moduleOption,
+      abbr: 'm',
+      help: 'Support multiple modules',
+      defaultsTo: defaultConfigFile,
     );
 
   final ArgResults argResults = parser.parse(arguments);
@@ -71,6 +78,9 @@ Future<void> createIconsFromArguments(List<String> arguments) async {
   // Flavors management
   final flavors = getFlavors();
   final hasFlavors = flavors.isNotEmpty;
+
+  // Support Module
+  final String module = argResults[moduleOption];
 
   final String prefixPath = argResults[prefixOption];
 
@@ -91,6 +101,7 @@ Future<void> createIconsFromArguments(List<String> arguments) async {
         flutterLauncherIconsConfigs,
         logger,
         prefixPath,
+        module,
       );
       print('\n✓ Successfully generated launcher icons');
     } catch (e) {
@@ -113,6 +124,7 @@ Future<void> createIconsFromArguments(List<String> arguments) async {
           flutterLauncherIconsConfigs,
           logger,
           prefixPath,
+          module,
           flavor,
         );
       }
@@ -128,7 +140,8 @@ Future<void> createIconsFromArguments(List<String> arguments) async {
 Future<void> createIconsFromConfig(
   Config flutterConfigs,
   FLILogger logger,
-  String prefixPath, [
+  String prefixPath,
+  String? module, [
   String? flavor,
 ]) async {
   if (!flutterConfigs.hasPlatformConfig) {
@@ -136,25 +149,27 @@ Future<void> createIconsFromConfig(
   }
 
   if (flutterConfigs.isNeedingNewAndroidIcon) {
-    android_launcher_icons.createDefaultIcons(flutterConfigs, flavor);
+    android_launcher_icons.createDefaultIcons(flutterConfigs, flavor, module);
   }
   if (flutterConfigs.hasAndroidAdaptiveConfig) {
-    android_launcher_icons.createAdaptiveIcons(flutterConfigs, flavor);
+    android_launcher_icons.createAdaptiveIcons(flutterConfigs, flavor, module);
   }
   if (flutterConfigs.hasAndroidAdaptiveMonochromeConfig) {
     android_launcher_icons.createAdaptiveMonochromeIcons(
       flutterConfigs,
       flavor,
+      module,
     );
   }
   if (flutterConfigs.isNeedingNewAndroidIcon) {
     android_launcher_icons.createMipmapXmlFile(
       flutterConfigs,
       flavor,
+      module,
     );
   }
   if (flutterConfigs.isNeedingNewIOSIcon) {
-    ios_launcher_icons.createIcons(flutterConfigs, flavor);
+    ios_launcher_icons.createIcons(flutterConfigs, flavor, module);
   }
 
   // Generates Icons for given platform
@@ -163,6 +178,7 @@ Future<void> createIconsFromConfig(
     logger: logger,
     prefixPath: prefixPath,
     flavor: flavor,
+    module: module,
     platforms: (context) {
       final platforms = <IconGenerator>[];
       if (flutterConfigs.hasWebConfig) {

@@ -36,6 +36,7 @@ void main() {
       generateIconsFor(
         config: mockFLIConfig,
         flavor: null,
+        module: null,
         prefixPath: prefixPath,
         logger: logger,
         platforms: (context) => [mockGenerator],
@@ -51,6 +52,7 @@ void main() {
       generateIconsFor(
         config: mockFLIConfig,
         flavor: null,
+        module: null,
         prefixPath: prefixPath,
         logger: logger,
         platforms: (context) => [mockGenerator],
@@ -66,6 +68,7 @@ void main() {
       generateIconsFor(
         config: mockFLIConfig,
         flavor: null,
+        module: null,
         prefixPath: prefixPath,
         logger: logger,
         platforms: (context) => [mockGenerator],

@@ -3,16 +3,27 @@
 import 'package:path/path.dart' as path;
 
 /// Relative path to android resource folder
-String androidResFolder(String? flavor) =>
-    "android/app/src/${flavor ?? 'main'}/res/";
+String androidResFolder(String? flavor, String? module) =>
+    module == null || module.isEmpty
+        ? "android/app/src/${flavor ?? 'main'}/res/"
+        : "../$module/android/app/src/${flavor ?? 'main'}/res/";
 
 /// Relative path to android colors.xml file
-String androidColorsFile(String? flavor) =>
-    "android/app/src/${flavor ?? 'main'}/res/values/colors.xml";
+String androidColorsFile(String? flavor, String? module) => module == null ||
+        module.isEmpty
+    ? "android/app/src/${flavor ?? 'main'}/res/values/colors.xml"
+    : "../$module/android/app/src/${flavor ?? 'main'}/res/values/colors.xml";
 
-const String androidManifestFile = 'android/app/src/main/AndroidManifest.xml';
-const String androidGradleFile = 'android/app/build.gradle';
-const String androidLocalPropertiesFile = 'android/local.properties';
+String androidManifestFile(String? module) => module == null || module.isEmpty
+    ? 'android/app/src/main/AndroidManifest.xml'
+    : '../$module/android/app/src/main/AndroidManifest.xml';
+String androidGradleFile(String? module) => module == null || module.isEmpty
+    ? 'android/app/build.gradle'
+    : '../$module/android/app/build.gradle';
+String androidLocalPropertiesFile(String? module) =>
+    module == null || module.isEmpty
+        ? 'android/local.properties'
+        : '../$module/android/local.properties';
 
 /// Relative path to flutter.gradle from flutter sdk path
 const String androidFlutterGardlePath =
@@ -25,14 +36,19 @@ const String androidFileName = 'ic_launcher.png';
 const String androidAdaptiveForegroundFileName = 'ic_launcher_foreground.png';
 const String androidAdaptiveBackgroundFileName = 'ic_launcher_background.png';
 const String androidAdaptiveMonochromeFileName = 'ic_launcher_monochrome.png';
-String androidAdaptiveXmlFolder(String? flavor) =>
-    androidResFolder(flavor) + 'mipmap-anydpi-v26/';
+String androidAdaptiveXmlFolder(String? flavor, String? module) =>
+    androidResFolder(flavor, module) + 'mipmap-anydpi-v26/';
 const String androidDefaultIconName = 'ic_launcher';
 
-const String iosDefaultIconFolder =
-    'ios/Runner/Assets.xcassets/AppIcon.appiconset/';
-const String iosAssetFolder = 'ios/Runner/Assets.xcassets/';
-const String iosConfigFile = 'ios/Runner.xcodeproj/project.pbxproj';
+String iosDefaultIconFolder(String? module) => module == null || module.isEmpty
+    ? 'ios/Runner/Assets.xcassets/AppIcon.appiconset/'
+    : '../$module/ios/Runner/Assets.xcassets/AppIcon.appiconset/';
+String iosAssetFolder(String? module) => module == null || module.isEmpty
+    ? 'ios/Runner/Assets.xcassets/'
+    : '../$module/ios/Runner/Assets.xcassets/';
+String iosConfigFile(String? module) => module == null || module.isEmpty
+    ? 'ios/Runner.xcodeproj/project.pbxproj'
+    : '../$module/ios/Runner.xcodeproj/project.pbxproj';
 const String iosDefaultIconName = 'Icon-App';
 
 // web
@@ -40,19 +56,24 @@ const String iosDefaultIconName = 'Icon-App';
 const int kFaviconSize = 16;
 
 /// Relative web direcotry path
-String webDirPath = path.join('web');
+String webDirPath(String? module) =>
+    path.join(module == null || module.isEmpty ? 'web' : '../$module/web');
 
 /// Relative web icons directory path
-String webIconsDirPath = path.join(webDirPath, 'icons');
+String webIconsDirPath(String? module) =>
+    path.join(webDirPath(module), 'icons');
 
 /// Relative web manifest.json file path
-String webManifestFilePath = path.join(webDirPath, 'manifest.json');
+String webManifestFilePath(String? module) =>
+    path.join(webDirPath(module), 'manifest.json');
 // TODO(RatakondalaArun): support for other images formats
 /// Relative favicon.png path
-String webFaviconFilePath = path.join(webDirPath, 'favicon.png');
+String webFaviconFilePath(String? module) =>
+    path.join(webDirPath(module), 'favicon.png');
 
 /// Relative index.html file path
-String webIndexFilePath = path.join(webDirPath, 'index.html');
+String webIndexFilePath(String? module) =>
+    path.join(webDirPath(module), 'index.html');
 
 /// Relative pubspec.yaml path
 String pubspecFilePath = path.join('pubspec.yaml');

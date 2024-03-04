@@ -37,6 +37,7 @@ List<AndroidIconTemplate> androidIcons = <AndroidIconTemplate>[
 void createDefaultIcons(
   Config config,
   String? flavor,
+  String? module,
 ) {
   utils.printStatus('Creating default icons Android');
   // TODO(p-mazhnik): support prefixPath
@@ -48,14 +49,14 @@ void createDefaultIcons(
   if (image == null) {
     return;
   }
-  final File androidManifestFile = File(constants.androidManifestFile);
+  final File androidManifestFile = File(constants.androidManifestFile(module));
   if (config.isCustomAndroidFile) {
     utils.printStatus('Adding a new Android launcher icon');
     final String iconName = config.android;
     isAndroidIconNameCorrectFormat(iconName);
     final String iconPath = '$iconName.png';
     for (AndroidIconTemplate template in androidIcons) {
-      _saveNewImages(template, image, iconPath, flavor);
+      _saveNewImages(template, image, iconPath, flavor, module);
     }
     overwriteAndroidManifestWithNewLauncherIcon(iconName, androidManifestFile);
   } else {
@@ -68,6 +69,7 @@ void createDefaultIcons(
         image,
         constants.androidFileName,
         flavor,
+        module,
       );
     }
     overwriteAndroidManifestWithNewLauncherIcon(
@@ -91,6 +93,7 @@ bool isAndroidIconNameCorrectFormat(String iconName) {
 void createAdaptiveIcons(
   Config config,
   String? flavor,
+  String? module,
 ) {
   utils.printStatus('Creating adaptive icons Android');
 
@@ -112,6 +115,7 @@ void createAdaptiveIcons(
       foregroundImage,
       constants.androidAdaptiveForegroundFileName,
       flavor,
+      module,
     );
   }
 
@@ -121,15 +125,17 @@ void createAdaptiveIcons(
       config,
       backgroundConfig,
       flavor,
+      module,
     );
   } else {
-    updateColorsXmlFile(backgroundConfig, flavor);
+    updateColorsXmlFile(backgroundConfig, flavor, module);
   }
 }
 
 void createAdaptiveMonochromeIcons(
   Config config,
   String? flavor,
+  String? module,
 ) {
   utils.printStatus('Creating adaptive monochrome icons Android');
 
@@ -150,6 +156,7 @@ void createAdaptiveMonochromeIcons(
       monochromeImage,
       constants.androidAdaptiveMonochromeFileName,
       flavor,
+      module,
     );
   }
 }
@@ -157,6 +164,7 @@ void createAdaptiveMonochromeIcons(
 void createMipmapXmlFile(
   Config config,
   String? flavor,
+  String? module,
 ) {
   utils.printStatus('Creating mipmap xml file Android');
 
@@ -183,11 +191,13 @@ void createMipmapXmlFile(
   late File mipmapXmlFile;
   if (config.isCustomAndroidFile) {
     mipmapXmlFile = File(
-      constants.androidAdaptiveXmlFolder(flavor) + config.android + '.xml',
+      constants.androidAdaptiveXmlFolder(flavor, module) +
+          config.android +
+          '.xml',
     );
   } else {
     mipmapXmlFile = File(
-      constants.androidAdaptiveXmlFolder(flavor) +
+      constants.androidAdaptiveXmlFolder(flavor, module) +
           constants.androidDefaultIconName +
           '.xml',
     );
@@ -207,8 +217,12 @@ void createMipmapXmlFile(
 ///
 /// If not, the colors.xml file is created and a color item for the adaptive icon
 /// background is included in the new colors.xml file.
-void updateColorsXmlFile(String backgroundConfig, String? flavor) {
-  final File colorsXml = File(constants.androidColorsFile(flavor));
+void updateColorsXmlFile(
+  String backgroundConfig,
+  String? flavor,
+  String? module,
+) {
+  final File colorsXml = File(constants.androidColorsFile(flavor, module));
   if (colorsXml.existsSync()) {
     utils.printStatus(
       'Updating colors.xml with color for adaptive icon background',
@@ -219,7 +233,7 @@ void updateColorsXmlFile(String backgroundConfig, String? flavor) {
     utils.printStatus(
       'Creating colors.xml file and adding it to your Android project',
     );
-    createNewColorsFile(backgroundConfig, flavor);
+    createNewColorsFile(backgroundConfig, flavor, module);
   }
 }
 
@@ -228,6 +242,7 @@ void _createAdaptiveBackgrounds(
   Config config,
   String adaptiveIconBackgroundImagePath,
   String? flavor,
+  String? module,
 ) {
   final String filePath = adaptiveIconBackgroundImagePath;
   final Image? image = utils.decodeImageFile(filePath);
@@ -243,15 +258,20 @@ void _createAdaptiveBackgrounds(
       image,
       constants.androidAdaptiveBackgroundFileName,
       flavor,
+      module,
     );
   }
 }
 
 /// Creates a colors.xml file if it was missing from android/app/src/main/res/values/colors.xml
-void createNewColorsFile(String backgroundColor, String? flavor) {
-  File(constants.androidColorsFile(flavor))
-      .create(recursive: true)
-      .then((File colorsFile) {
+void createNewColorsFile(
+  String backgroundColor,
+  String? flavor,
+  String? module,
+) {
+  File(
+    constants.androidColorsFile(flavor, module),
+  ).create(recursive: true).then((File colorsFile) {
     colorsFile.writeAsString(xml_template.colorsXml).then((File file) {
       updateColorsFile(colorsFile, backgroundColor);
     });
@@ -294,10 +314,11 @@ void overwriteExistingIcons(
   Image image,
   String filename,
   String? flavor,
+  String? module,
 ) {
   final Image newFile = utils.createResizedImage(template.size, image);
   File(
-    constants.androidResFolder(flavor) +
+    constants.androidResFolder(flavor, module) +
         template.directoryName +
         '/' +
         filename,
@@ -314,10 +335,11 @@ void _saveNewImages(
   Image image,
   String iconFilePath,
   String? flavor,
+  String? module,
 ) {
   final Image newFile = utils.createResizedImage(template.size, image);
   File(
-    constants.androidResFolder(flavor) +
+    constants.androidResFolder(flavor, module) +
         template.directoryName +
         '/' +
         iconFilePath,
@@ -372,9 +394,10 @@ List<String> _transformAndroidManifestWithNewLauncherIcon(
 /// - local.properties: `'android/local.properties'`
 ///
 /// If found none returns [constants.androidDefaultAndroidMinSDK]
-int minSdk() {
-  final androidGradleFile = File(constants.androidGradleFile);
-  final androidLocalPropertiesFile = File(constants.androidLocalPropertiesFile);
+int minSdk(String? module) {
+  final androidGradleFile = File(constants.androidGradleFile(module));
+  final androidLocalPropertiesFile =
+      File(constants.androidLocalPropertiesFile(module));
 
   // looks for minSdk value in build.gradle, flutter.gradle & local.properties.
   // this should always be order

@@ -48,12 +48,16 @@ class IconGeneratorContext {
   /// Value of `--flavor` flag
   final String? flavor;
 
+  /// Value of `--module` flag
+  final String? module;
+
   /// Creates an instance of [IconGeneratorContext]
   IconGeneratorContext({
     required this.config,
     required this.logger,
     required this.prefixPath,
     this.flavor,
+    this.module,
   });
 
   /// Shortcut for `config.webConfig`
@@ -64,12 +68,16 @@ class IconGeneratorContext {
 
   /// Shortcut for `config.macOSConfig`
   MacOSConfig? get macOSConfig => config.macOSConfig;
+
+  String get imagePath =>
+      module == null || module?.isEmpty == true ? prefixPath : '../$module';
 }
 
 /// Generates Icon for given platforms
 void generateIconsFor({
   required Config config,
   required String? flavor,
+  required String? module,
   required String prefixPath,
   required FLILogger logger,
   required List<IconGenerator> Function(IconGeneratorContext context) platforms,
@@ -81,6 +89,7 @@ void generateIconsFor({
         logger: logger,
         prefixPath: prefixPath,
         flavor: flavor,
+        module: module,
       ),
     );
     if (platformList.isEmpty) {
