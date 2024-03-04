@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.13.1 - (27 Feb 2024)
+
+- Add `module` option
+
 ## 0.13.1 (15th April 2023)
 
 - Can now use `flutter_launcher_icons` instead of `flutter_icons` [#478](https://github.com/fluttercommunity/flutter_launcher_icons/pull/478)

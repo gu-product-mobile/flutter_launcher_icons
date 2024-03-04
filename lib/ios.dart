@@ -47,7 +47,7 @@ List<IosIconTemplate> iosIcons = <IosIconTemplate>[
 ];
 
 /// create the ios icons
-void createIcons(Config config, String? flavor) {
+void createIcons(Config config, String? flavor, String? module) {
   // TODO(p-mazhnik): support prefixPath
   final String? filePath = config.getImagePathIOS();
   if (filePath == null) {
@@ -79,49 +79,55 @@ void createIcons(Config config, String? flavor) {
     final String catalogName = 'AppIcon-$flavor';
     printStatus('Building iOS launcher icon for $flavor');
     for (IosIconTemplate template in iosIcons) {
-      saveNewIcons(template, image, catalogName);
+      saveNewIcons(template, image, catalogName, module);
     }
     iconName = iosDefaultIconName;
-    changeIosLauncherIcon(catalogName, flavor);
-    modifyContentsFile(catalogName);
+    changeIosLauncherIcon(catalogName, flavor, module);
+    modifyContentsFile(catalogName, module);
   } else if (iosConfig is String) {
     // If the IOS configuration is a string then the user has specified a new icon to be created
     // and for the old icon file to be kept
     final String newIconName = iosConfig;
     printStatus('Adding new iOS launcher icon');
     for (IosIconTemplate template in iosIcons) {
-      saveNewIcons(template, image, newIconName);
+      saveNewIcons(template, image, newIconName, module);
     }
     iconName = newIconName;
-    changeIosLauncherIcon(iconName, flavor);
-    modifyContentsFile(iconName);
+    changeIosLauncherIcon(iconName, flavor, module);
+    modifyContentsFile(iconName, module);
   }
   // Otherwise the user wants the new icon to use the default icons name and
   // update config file to use it
   else {
     printStatus('Overwriting default iOS launcher icon with new icon');
     for (IosIconTemplate template in iosIcons) {
-      overwriteDefaultIcons(template, image);
+      overwriteDefaultIcons(template, image, module);
     }
     iconName = iosDefaultIconName;
-    changeIosLauncherIcon('AppIcon', flavor);
+    changeIosLauncherIcon('AppIcon', flavor, module);
   }
 }
 
 /// Note: Do not change interpolation unless you end up with better results (see issue for result when using cubic
 /// interpolation)
 /// https://github.com/fluttercommunity/flutter_launcher_icons/issues/101#issuecomment-495528733
-void overwriteDefaultIcons(IosIconTemplate template, Image image) {
+void overwriteDefaultIcons(
+    IosIconTemplate template, Image image, String? module) {
   final Image newFile = createResizedImage(template, image);
-  File(iosDefaultIconFolder + iosDefaultIconName + template.name + '.png')
+  File(iosDefaultIconFolder(module) +
+      iosDefaultIconName +
+      template.name +
+      '.png')
     ..writeAsBytesSync(encodePng(newFile));
 }
 
 /// Note: Do not change interpolation unless you end up with better results (see issue for result when using cubic
 /// interpolation)
 /// https://github.com/fluttercommunity/flutter_launcher_icons/issues/101#issuecomment-495528733
-void saveNewIcons(IosIconTemplate template, Image image, String newIconName) {
-  final String newIconFolder = iosAssetFolder + newIconName + '.appiconset/';
+void saveNewIcons(
+    IosIconTemplate template, Image image, String newIconName, String? module) {
+  final String newIconFolder =
+      iosAssetFolder(module) + newIconName + '.appiconset/';
   final Image newFile = createResizedImage(template, image);
   File(newIconFolder + newIconName + template.name + '.png')
       .create(recursive: true)
@@ -150,8 +156,12 @@ Image createResizedImage(IosIconTemplate template, Image image) {
 }
 
 /// Change the iOS launcher icon
-Future<void> changeIosLauncherIcon(String iconName, String? flavor) async {
-  final File iOSConfigFile = File(iosConfigFile);
+Future<void> changeIosLauncherIcon(
+  String iconName,
+  String? flavor,
+  String? module,
+) async {
+  final File iOSConfigFile = File(iosConfigFile(module));
   final List<String> lines = await iOSConfigFile.readAsLines();
 
   bool onConfigurationSection = false;
@@ -184,9 +194,9 @@ Future<void> changeIosLauncherIcon(String iconName, String? flavor) async {
 }
 
 /// Create the Contents.json file
-void modifyContentsFile(String newIconName) {
+void modifyContentsFile(String newIconName, String? module) {
   final String newIconFolder =
-      iosAssetFolder + newIconName + '.appiconset/Contents.json';
+      iosAssetFolder(module) + newIconName + '.appiconset/Contents.json';
   File(newIconFolder).create(recursive: true).then((File contentsJsonFile) {
     final String contentsFileContent =
         generateContentsFileAsString(newIconName);
